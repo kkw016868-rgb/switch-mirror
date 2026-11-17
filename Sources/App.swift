@@ -1,16 +1,29 @@
 import UIKit
 import AVFoundation
 
+// 씬 기반 생명주기 — 없으면 최신 iPadOS가 호환 모드(세로 고정 창)로 띄움
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
-
     func application(_ app: UIApplication, didFinishLaunchingWithOptions opts: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         app.isIdleTimerDisabled = true  // 화면 꺼짐 방지
-        window = UIWindow(frame: UIScreen.main.bounds)
+        return true
+    }
+
+    func application(_ app: UIApplication, configurationForConnecting session: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let config = UISceneConfiguration(name: nil, sessionRole: session.role)
+        config.delegateClass = SceneDelegate.self
+        return config
+    }
+}
+
+final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    var window: UIWindow?
+
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options: UIScene.ConnectionOptions) {
+        guard let windowScene = scene as? UIWindowScene else { return }
+        window = UIWindow(windowScene: windowScene)
         window?.rootViewController = MirrorViewController()
         window?.makeKeyAndVisible()
-        return true
     }
 }
 
