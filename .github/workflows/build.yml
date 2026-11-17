@@ -5,7 +5,7 @@ permissions:
 
 jobs:
   ipa:
-    runs-on: macos-latest
+    runs-on: macos-15-intel  # arm64 러너 대기열이 막혀서 Intel 사용
     steps:
       - uses: actions/checkout@v4
       - run: brew install xcodegen && xcodegen
