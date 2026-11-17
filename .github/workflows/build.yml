@@ -1,0 +1,22 @@
+name: build
+on: [push, workflow_dispatch]
+
+jobs:
+  ipa:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install xcodegen && xcodegen
+      - run: >
+          xcodebuild -project SwitchMirror.xcodeproj -target SwitchMirror
+          -configuration Release -sdk iphoneos SYMROOT=build
+          CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+      # 서명 안 된 IPA — Sideloadly가 설치하면서 서명함
+      - run: |
+          mkdir Payload
+          cp -R build/Release-iphoneos/SwitchMirror.app Payload/
+          zip -qr SwitchMirror.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SwitchMirror
+          path: SwitchMirror.ipa
