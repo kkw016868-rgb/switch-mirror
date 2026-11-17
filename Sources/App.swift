@@ -45,7 +45,12 @@ final class MirrorViewController: UIViewController {
         view.backgroundColor = .black
 
         previewLayer.session = session
-        previewLayer.videoGravity = .resizeAspect
+        previewLayer.videoGravity = Self.gravities[UserDefaults.standard.integer(forKey: "gravity") % Self.gravities.count]
+
+        // 두 번 탭: 비율 유지(여백) → 꽉 채우기(좌우 잘림) → 늘리기(찌그러짐)
+        let tap = UITapGestureRecognizer(target: self, action: #selector(cycleGravity))
+        tap.numberOfTapsRequired = 2
+        view.addGestureRecognizer(tap)
         view.layer.addSublayer(previewLayer)
 
         label.text = "캡처보드를 연결하세요"
@@ -73,6 +78,17 @@ final class MirrorViewController: UIViewController {
                 DispatchQueue.main.async { self.reconnect() }
             }
         }
+    }
+
+    private static let gravities: [AVLayerVideoGravity] = [.resizeAspect, .resizeAspectFill, .resize]
+
+    @objc private func cycleGravity() {
+        let next = (UserDefaults.standard.integer(forKey: "gravity") + 1) % Self.gravities.count
+        UserDefaults.standard.set(next, forKey: "gravity")
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        previewLayer.videoGravity = Self.gravities[next]
+        CATransaction.commit()
     }
 
     override func viewDidLayoutSubviews() {
