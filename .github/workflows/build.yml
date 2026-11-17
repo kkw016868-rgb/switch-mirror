@@ -1,5 +1,7 @@
 name: build
 on: [push, workflow_dispatch]
+permissions:
+  contents: write
 
 jobs:
   ipa:
@@ -16,7 +18,9 @@ jobs:
           mkdir Payload
           cp -R build/Release-iphoneos/SwitchMirror.app Payload/
           zip -qr SwitchMirror.ipa Payload
-      - uses: actions/upload-artifact@v4
-        with:
-          name: SwitchMirror
-          path: SwitchMirror.ipa
+      # iPad Safari에서 바로 받기: releases/latest/download/SwitchMirror.ipa
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest -y --cleanup-tag || true
+          gh release create latest SwitchMirror.ipa --title "SwitchMirror" --notes "${{ github.sha }}"
