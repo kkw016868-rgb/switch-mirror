@@ -38,6 +38,7 @@ final class MirrorViewController: UIViewController {
     override var prefersStatusBarHidden: Bool { true }
     override var prefersHomeIndicatorAutoHidden: Bool { true }
     override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge { .all }
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask { .landscape }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -77,6 +78,13 @@ final class MirrorViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         previewLayer.frame = view.bounds
+        lockVideoUpright()
+    }
+
+    // 외부 캡처보드는 iPad 몸체와 무관 — 기기 방향에 따른 회전 없이 화면 기준 항상 정방향
+    private func lockVideoUpright() {
+        guard let c = previewLayer.connection, c.isVideoRotationAngleSupported(0) else { return }
+        c.videoRotationAngle = 0
     }
 
     private func reconnect() {
@@ -103,6 +111,7 @@ final class MirrorViewController: UIViewController {
                     c.automaticallyAdjustsVideoMirroring = false
                     c.isVideoMirrored = false
                 }
+                lockVideoUpright()
             }
         }
         audio.start()
